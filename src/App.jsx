@@ -96,9 +96,8 @@ export default function App() {
   } catch (err) {
     console.error(err);
     alert("Mint failed");
-await tx.wait();
 
-await loadNFTs();   // 🔥 ADD THIS
+   await loadNFTs();   // 🔥 ADD THIS
   }
 
   setLoading(false); // 🔥 STOP LOADING
