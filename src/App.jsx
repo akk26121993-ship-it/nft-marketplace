@@ -194,7 +194,7 @@ function disconnectWallet() {
 async function loadNFTs() {
   try {
     const provider = new ethers.JsonRpcProvider(
-  import.meta.env.VITE_RPC_URL
+  https://eth-sepolia.g.alchemy.com/v2/JC1Knp8rwl4WDnC93Ua3f
 );
 const network = await provider.getNetwork();
     console.log("Connected to:", network);
