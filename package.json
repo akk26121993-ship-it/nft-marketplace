@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@walletconnect/ethereum-provider": "^2.23.9",
+    "@walletconnect/modal": "^2.7.0",
     "axios": "^1.15.2",
     "ethers": "^6.16.0",
     "react": "^19.2.5",

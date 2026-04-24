@@ -1,9 +1,11 @@
 import Profile from "./Profile";
 import { useState, useEffect } from "react";
 import { connectWallet } from "./connectWallet";
-import { contractAddress, contractABI } from "./contract";
+import { contractABI } from "./contract";
 import { ethers } from "ethers";
 import { uploadImage, uploadMetadata } from "./ipfs";
+
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 
 const cardStyle = {
@@ -97,7 +99,6 @@ export default function App() {
     console.error(err);
     alert("Mint failed");
 
-   await loadNFTs();   // 🔥 ADD THIS
   }
 
   setLoading(false); // 🔥 STOP LOADING
@@ -193,8 +194,8 @@ function disconnectWallet() {
   // 🔥 LOAD MARKETPLACE NFTs
 async function loadNFTs() {
   try {
-    const provider = new ethers.JsonRpcProvider(
-  "https://eth-sepolia.g.alchemy.com/v2/JC1Knp8rwl4WDnC93Ua3f"
+const provider = new ethers.JsonRpcProvider(
+  import.meta.env.VITE_ALCHEMY_URL
 );
 const network = await provider.getNetwork();
     console.log("Connected to:", network);
@@ -205,42 +206,44 @@ const network = await provider.getNetwork();
       provider
     );
 
-    let items = [];
+    
     const total = Number(await contract.tokenId());
 
     console.log("Total NFTs:", total); // 👈 DEBUG
 
-    for (let i = 1; i <= total; i++) {
-      try {
-        const owner = await contract.ownerOf(i);
-        const uri = await contract.tokenURI(i);
+    const tokenIds = Array.from({ length: total }, (_, i) => i + 1);
 
-        const res = await fetch(uri);
-        const metadata = await res.json();
+const items = await Promise.all(
+  tokenIds.map(async (i) => {
+    try {
+      const [owner, uri, listing] = await Promise.all([
+        contract.ownerOf(i),
+        contract.tokenURI(i),
+        contract.listings(i),
+      ]);
 
-        let listing = await contract.listings(i);
+      const res = await fetch(uri);
+      const metadata = await res.json();
 
-       
-        items.push({
-          id: i,
-          owner,
-          price: listing.price,
-          seller: listing.seller,
-          name: metadata.name,
-          description: metadata.description,
-          image: metadata.image.replace(
-            "ipfs://",
-            "https://gateway.pinata.cloud/ipfs/"
-          ),
-        });
-      } catch (err) {
-        console.log("Skipping NFT", i);
-      }
+      return {
+        id: i,
+        owner,
+        price: listing.price,
+        seller: listing.seller,
+        name: metadata.name,
+        description: metadata.description,
+        image: metadata.image.replace(
+          "ipfs://",
+          "https://gateway.pinata.cloud/ipfs/"
+        ),
+      };
+    } catch (err) {
+      return null; // skip broken NFTs
     }
+  })
+);
 
-    console.log("Loaded NFTs:", items); // 👈 DEBUG
-    setNfts(items);
-
+setNfts(items.filter(Boolean));
   } catch (err) {
     console.error("LOAD ERROR:", err);
   }
