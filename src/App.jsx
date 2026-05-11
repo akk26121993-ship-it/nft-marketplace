@@ -6,6 +6,7 @@ import {
 import { contractABI } from "./contract";
 import { ethers } from "ethers";
 import { uploadImage, uploadMetadata } from "./ipfs";
+import { Analytics } from "@vercel/analytics/react";
 
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
@@ -2424,6 +2425,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
