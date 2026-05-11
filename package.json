@@ -10,10 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reown/appkit": "^1.8.19",
+    "@reown/appkit-adapter-ethers": "^1.8.19",
     "@walletconnect/ethereum-provider": "^2.23.9",
     "@walletconnect/modal": "^2.7.0",
     "axios": "^1.15.2",
     "ethers": "^6.16.0",
+    "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
