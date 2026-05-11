@@ -1216,12 +1216,18 @@ async function loadBlockchainHistory() {
     setTxHistory(formattedHistory);
 
     const formattedActivity = formattedHistory.map((item) => ({
-      id: item.id,
-      type: "activity",
-      nftId: item.nftId,
-      address: item.to,
-      ts: item.ts,
-    }));
+  id: item.id,
+  type: "activity",
+  nftId: item.nftId,
+  address: item.to,
+  ts: item.ts,
+
+  def: {
+    color: "#00f5ff",
+    icon: "🔥",
+    label: "NFT Transfer"
+  }
+}));
 
     setActivityFeed(formattedActivity);
 
@@ -2080,12 +2086,13 @@ async function loadBlockchainHistory() {
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {activityFeed.map((item) => (
                   <div key={item.id} className="activity-item">
-                    <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: `${item.def.color}22`, border: `1px solid ${item.def.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>
-                      {item.def.icon}
+                    <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: `${item.def?.color || "#00f5ff"}22`,
+border: `1px solid ${item.def?.color || "#00f5ff"}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>
+                      {item.def?.icon || "🔥"}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 700, color: item.def.color, fontSize: "13px" }}>{item.def.label}</span>
+                        <span style={{ fontWeight: 700, color: item.def?.color || "#00f5ff", fontSize: "13px" }}>{item.def?.label || "Activity"}</span>
                         <span style={{ color: "var(--txt)", fontWeight: 600, fontSize: "13px" }}>{item.nftName}</span>
                         {item.amount && <span style={{ fontSize: "12px", color: "var(--p)", fontFamily: "var(--mono)", fontWeight: 700 }}>{item.amount}</span>}
                       </div>
