@@ -1109,8 +1109,8 @@ export default function App() {
   const [sort, setSort] = useState("recent");
   const [userBalance, setUserBalance] = useState("0");
 
-  const [activityFeed, setActivityFeed] = usePersistentState("nft_activityFeed", []);
-  const [txHistory, setTxHistory] = usePersistentState("nft_txHistory", []);
+ const [activityFeed, setActivityFeed] = useState([]);
+ const [txHistory, setTxHistory] = useState([]);
 
   const [gasEstimate, setGasEstimate] = useState(null);
   const [gasLoading, setGasLoading] = useState(false);
@@ -1168,10 +1168,67 @@ export default function App() {
     });
   }
 
-  useEffect(() => {
-    loadNFTs();
-    return () => { if (listenerRef.current) try { listenerRef.current.removeAllListeners(); } catch {} };
-  }, []);
+useEffect(() => {
+  loadNFTs();
+  loadBlockchainHistory();
+}, []);
+
+async function loadBlockchainHistory() {
+  try {
+    console.log("Loading blockchain history...");
+
+    const provider = new ethers.JsonRpcProvider(
+      import.meta.env.VITE_ALCHEMY_URL
+    );
+
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      provider
+    );
+
+    const currentBlock = await provider.getBlockNumber();
+
+    // Scan only recent blocks
+    const fromBlock = Math.max(currentBlock - 5000, 0);
+
+    console.log("Scanning blocks:", fromBlock, currentBlock);
+
+    // Transfer events
+    const transferEvents = await contract.queryFilter(
+      contract.filters.Transfer(),
+      fromBlock,
+      currentBlock
+    );
+
+    console.log("Transfer events:", transferEvents);
+
+    const formattedHistory = transferEvents.map((event) => ({
+      id: event.transactionHash,
+      type: "Transfer",
+      nftId: Number(event.args[2]),
+      txHash: event.transactionHash,
+      from: event.args[0],
+      to: event.args[1],
+      ts: new Date().toLocaleString(),
+    }));
+
+    setTxHistory(formattedHistory);
+
+    const formattedActivity = formattedHistory.map((item) => ({
+      id: item.id,
+      type: "activity",
+      nftId: item.nftId,
+      address: item.to,
+      ts: item.ts,
+    }));
+
+    setActivityFeed(formattedActivity);
+
+  } catch (err) {
+    console.error("BLOCKCHAIN HISTORY ERROR:", err);
+  }
+}
 
   async function handleConnect() {
     try {
